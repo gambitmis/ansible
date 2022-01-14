@@ -1,0 +1,28 @@
+---
+ - name: Upgrade all package to lastet version
+   hosts: ops
+   tasks:
+
+     - debug:
+         msg: "Working on Hostname:{ {{ inventory_hostname }} } Distribution:{ {{ ansible_distribution }} {{ ansible_distribution_version }} } Operation Time:{ {{ ansible_date_time.date }} {{ ansible_date_time.time }} {{ ansible_date_time.tz }} }"
+     - debug:
+         msg: "Hostname:{ {{ inventory_hostname }} } IPAddr:{ {{ ansible_all_ipv4_addresses }} } Gateway:{ {{ ansible_default_ipv4.gateway }} }"
+       when:
+        - ansible_default_ipv4.gateway is defined
+        - ansible_all_ipv4_addresses is defined
+          
+     - name: delete old golang
+       file:
+         path: /usr/local/go
+         state: absent
+
+     - name: unzip golang package
+       unarchive:
+         src: https://go.dev/dl/go1.17.4.linux-amd64.tar.gz
+         dest: /usr/local
+         remote_src: yes
+
+     - name: copy golang profile
+       copy:
+         src: /root/epod-iac/ansible/golang-profile.sh
+         dest: /etc/profile.d/golang-profile.sh
